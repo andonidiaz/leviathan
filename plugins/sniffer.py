@@ -1,34 +1,36 @@
+# coding=utf-8
+# coding=utf-8
 __author__ = 'root'
 #!/usr/bin/env python
-# coding: utf8
 
 import socket
 from struct import *
 import pcapy
 import sys
 
-class Sniffer:
-    def main(argv):
-        options = {'TCP': False, 'ICMP': False, 'UDP': False, 'OTHER': False}
-        if argv[2]:
-            dev = argv[2]
-        else:
-            devices = pcapy.findalldevs()
-            print devices
-            print "[!] Dispositivos disponibles:"
-            for d in devices:
-                print "[o] - " + d
 
-            dev = raw_input("[+] Introduzca el nombre del dispositivo: ")
+class Main:
+    __title__ = "Sniffer"
+    def main(self):
+        options = {'TCP': False, 'ICMP': False, 'UDP': False, 'OTHER': False}
+        devices = pcapy.findalldevs()
+        print devices
+        print "[!] Dispositivos disponibles:"
+        for d in devices:
+            print "[o] - " + d
+
+        dev = raw_input("[+] Introduzca el nombre del dispositivo: ")
 
         print "[!] Dispositivo seleccionado: " + dev
 
         cap = pcapy.open_live(dev, 65536, 1, 0)
+        options = str(input("Introduzca las opciones:"))
 
-        if argv[1] == 'ALL':
+        if options == 'ALL':
             options = {'TCP': True, 'ICMP': True, 'UDP': True, 'OTHER': True}
         else:
-            lista_options = tuple(argv[1].split(','))
+
+            lista_options = tuple(options.split(','))
             for opcion in lista_options:
                 if opcion in options:
                     options[opcion] = True
@@ -42,18 +44,14 @@ class Sniffer:
 
 
     # Parseador de la dirección mac de asignada a la ethernet
+    @property
     def eth_addr(a):
         b = "%.2x:%.2x:%.2x:%.2x:%.2x:%.2x" % (ord(a[0]), ord(a[1]), ord(a[2]), ord(a[3]), ord(a[4]), ord(a[5]))
         return b
 
-
-    def passwordFinder(data):
-        rece
-
-
-    #Función de parseo del paquete
+    # Función de parseo del paquete
     def parse_packet(packet, options):
-        #Parseo del paquete ethernet
+        # Parseo del paquete ethernet
         eth_length = 14
 
         eth_header = packet[:eth_length]
@@ -62,10 +60,10 @@ class Sniffer:
         print 'Destination MAC : ' + super.eth_addr(packet[0:6]) + ' Source MAC : ' + super.eth_addr(
             packet[6:12]) + ' Protocol : ' + str(eth_protocol)
 
-        #Parseamos todos los paquete tipo IP
+        # Parseamos todos los paquete tipo IP
         if eth_protocol == 8:
             #Parseamos la cabecera IP
-            #Cogemos los 20 LSbytes desde el principio de la cabecera
+            #Cogemos los 20 bytes desde el principio de la cabecera
             ip_header = packet[eth_length:20 + eth_length]
 
             #Desempaquetamos el paquete
@@ -94,7 +92,6 @@ class Sniffer:
                 t = iph_length + eth_length
                 tcp_header = packet[t:t + 20]
 
-
                 tcph = unpack('!HHLLBBHHH', tcp_header)
 
                 source_port = tcph[0]
@@ -104,7 +101,8 @@ class Sniffer:
                 doff_reserved = tcph[4]
                 tcph_length = doff_reserved >> 4
 
-                print 'Puerto de origen : ' + str(source_port) + ' Puerto de destino : ' + str(dest_port) + ' Numero de secuencia : ' + str(
+                print 'Puerto de origen : ' + str(source_port) + ' Puerto de destino : ' + str(
+                    dest_port) + ' Numero de secuencia : ' + str(
                     sequence) + ' ACK : ' + str(acknowledgement) + ' Longitud cabecera : ' + str(tcph_length)
 
                 h_size = eth_length + iph_length + tcph_length * 4
@@ -150,7 +148,8 @@ class Sniffer:
                 length = udph[2]
                 checksum = udph[3]
 
-                print 'Puerto de origen : ' + str(source_port) + ' Puerto de destino : ' + str(dest_port) + ' Longitud : ' + str(
+                print 'Puerto de origen : ' + str(source_port) + ' Puerto de destino : ' + str(
+                    dest_port) + ' Longitud : ' + str(
                     length) + ' Checksum : ' + str(checksum)
 
                 h_size = eth_length + iph_length + udph_length
