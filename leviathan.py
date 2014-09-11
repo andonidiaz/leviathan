@@ -3,7 +3,6 @@
 """
     Main module of the framework
 """
-import inspect
 
 __author__ = 'Andoni Diaz <andoni94@gmail.com>'
 __version__ = "0.0.1a"
@@ -20,18 +19,22 @@ class Leviathan(object):
         i = 0
         for plugin in list:
             elemento = plugin.Main()
-            print "[" + str(i) + "] - " + elemento.__title__ + ": " + elemento.__menu_entry__
+            print "  "+str(i)+" -> " + elemento.__menu_color__ + elemento.__title__ + chr(27)+"[0m" + ": " + elemento.__menu_entry__
             i += 1
 
     def mainLoop(list):
-        element = input("[+] Insert the plugin that you will load")
+        while True:
+            element = input(chr(27)+"[0;92m"+"[+]"+chr(27)+"[0m"+" Insert the plugin that you will load: ")
+            objeto = list[int(element)].Main()
+            objeto.main()
 
     if __name__ == "__main__":
         plugin_list = []
         module_list = []
         print LeviathanTitles.titles[random.randint(0, (len(LeviathanTitles.titles) - 1))]
-        print "Welcome to Leviathan v.%s" % __version__
-        print "[*] Loading all modules..."
+        print chr(27)+"[0;91m"+"Welcome to Leviathan v.%s" % __version__ + chr(27)+"[0m"
+        print chr(27)+"[1;91m"+"Developed by Marc Ruiz and Andoni Diaz.\n"
+        print chr(27)+"[0;91m"+"[*]"+chr(27)+"[0m"+" Loading all modules..."
         # Cargamos los ficheros en el directorio de plugins con una lista de comprensión
         plugins_files = []
         for f in listdir("plugins/"):
@@ -49,4 +52,7 @@ class Leviathan(object):
             module = imp.load_source(plugin, "./plugins/" + plugin + ".py")
             # module = __import__("plugins."+plugin, fromlist=['Main'])
             module_list.append(module)
-            buildMenu(module_list)
+        print chr(27)+"[0;92m"+"[*]"+chr(27)+"[0m"+" All modules loaded without problems."
+
+        buildMenu(module_list)
+        mainLoop(module_list)

@@ -1,34 +1,33 @@
-# coding=utf-8
-# coding=utf-8
-__author__ = 'root'
 #!/usr/bin/env python
+# coding=utf-8
+
+__author__ = 'Andoni Diaz <andoni94@gmail.com>'
 
 import socket
 from struct import *
 import pcapy
-import sys
-
 
 class Main:
     __title__ = "Sniffer"
     __description__ = ""
-    __menu_entry__ = "Sniffer that allows to catch"
+    __menu_entry__ = "Sniffer that allows to catch data directly from"
+    __version__ = "1.0"
+    __menu_color__ = chr(27)+"[0;91m"
 
     def main(self):
         options = {'TCP': False, 'ICMP': False, 'UDP': False, 'OTHER': False}
         devices = pcapy.findalldevs()
         print devices
-        print "[!] Dispositivos disponibles:"
+        print chr(27)+"[0;91m"+"[!]"+chr(27)+"[0m"+" Dispositivos disponibles:"
         for d in devices:
-            print "[o] - " + d
+            print " -> " + d
 
-        dev = raw_input("[+] Introduzca el nombre del dispositivo: ")
+        dev = raw_input(chr(27)+"[0;92m"+"[+]"+chr(27)+"[0m"+" Introduzca el nombre del dispositivo: ")
 
-        print "[!] Dispositivo seleccionado: " + dev
+        print chr(27)+"[0;91m"+"[!]"+chr(27)+"[0m"+" Dispositivo seleccionado: " + dev
 
         cap = pcapy.open_live(dev, 65536, 1, 0)
-        options = str(input("Introduzca las opciones:"))
-
+        options = raw_input(chr(27)+"[0;92m"+"[+]"+chr(27)+"[0m"+" Introduzca las opciones:")
         if options == 'ALL':
             options = {'TCP': True, 'ICMP': True, 'UDP': True, 'OTHER': True}
         else:
@@ -43,25 +42,23 @@ class Main:
         # Empezamos a sniffar paquetes
         while (1):
             (header, packet) = cap.next()
-            super.parse_packet(packet, options)
+            self.parse_packet(packet, options)
 
 
     # Parseador de la dirección mac de asignada a la ethernet
-    @property
-    def eth_addr(a):
+    def eth_addr(self,a):
         b = "%.2x:%.2x:%.2x:%.2x:%.2x:%.2x" % (ord(a[0]), ord(a[1]), ord(a[2]), ord(a[3]), ord(a[4]), ord(a[5]))
         return b
 
     # Función de parseo del paquete
-    def parse_packet(packet, options):
+    def parse_packet(self,packet, options):
         # Parseo del paquete ethernet
         eth_length = 14
 
         eth_header = packet[:eth_length]
         eth = unpack('!6s6sH', eth_header)
         eth_protocol = socket.ntohs(eth[2])
-        print 'Destination MAC : ' + super.eth_addr(packet[0:6]) + ' Source MAC : ' + super.eth_addr(
-            packet[6:12]) + ' Protocol : ' + str(eth_protocol)
+        print 'Destination MAC : ' + self.eth_addr(packet[0:6]) + ' Source MAC : ' + self.eth_addr(packet[6:12]) + ' Protocol : ' + str(eth_protocol)
 
         # Parseamos todos los paquete tipo IP
         if eth_protocol == 8:
@@ -115,7 +112,7 @@ class Main:
                 data = packet[h_size:]
 
                 print 'Data: ' + data
-                super.testFinder(data)
+
 
             #Paquetes de error ICMP
             elif protocol == 1 and options['ICMP']:
