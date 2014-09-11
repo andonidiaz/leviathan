@@ -28,14 +28,9 @@ class Leviathan(object):
             objeto = list[int(element)].Main()
             objeto.main()
 
-    if __name__ == "__main__":
+    def loadPlugins():
         plugin_list = []
         module_list = []
-        print LeviathanTitles.titles[random.randint(0, (len(LeviathanTitles.titles) - 1))]
-        print chr(27)+"[0;91m"+"Welcome to Leviathan v.%s" % __version__ + chr(27)+"[0m"
-        print chr(27)+"[1;91m"+"Developed by Marc Ruiz and Andoni Diaz.\n"
-        print chr(27)+"[0;91m"+"[*]"+chr(27)+"[0m"+" Loading all modules..."
-        # Cargamos los ficheros en el directorio de plugins con una lista de comprensión
         plugins_files = []
         for f in listdir("plugins/"):
             if isfile(join("plugins/", f)):
@@ -52,7 +47,17 @@ class Leviathan(object):
             module = imp.load_source(plugin, "./plugins/" + plugin + ".py")
             # module = __import__("plugins."+plugin, fromlist=['Main'])
             module_list.append(module)
-        print chr(27)+"[0;92m"+"[*]"+chr(27)+"[0m"+" All modules loaded without problems."
+        return module_list
 
+    if __name__ == "__main__":
+        print LeviathanTitles.titles[random.randint(0, (len(LeviathanTitles.titles) - 1))]
+        print chr(27)+"[0;91m"+"Welcome to Leviathan v.%s" % __version__ + chr(27)+"[0m"
+        print chr(27)+"[1;91m"+"Developed by Marc Ruiz and Andoni Diaz.\n"
+        print chr(27)+"[0;91m"+"[*]"+chr(27)+"[0m"+" Loading all modules..."
+        # Cargamos los ficheros en el directorio de plugins con una lista de comprensión
+
+
+        module_list = loadPlugins()
+        print chr(27)+"[0;92m"+"[*]"+chr(27)+"[0m"+" All modules loaded without problems."
         buildMenu(module_list)
         mainLoop(module_list)

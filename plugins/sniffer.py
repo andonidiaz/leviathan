@@ -6,28 +6,29 @@ __author__ = 'Andoni Diaz <andoni94@gmail.com>'
 import socket
 from struct import *
 import pcapy
+import re
 
 class Main:
     __title__ = "Sniffer"
     __description__ = ""
     __menu_entry__ = "Sniffer that allows to catch data directly from"
     __version__ = "1.0"
-    __menu_color__ = chr(27)+"[0;91m"
+    __menu_color__ = chr(27) + "[0;91m"
 
     def main(self):
         options = {'TCP': False, 'ICMP': False, 'UDP': False, 'OTHER': False}
         devices = pcapy.findalldevs()
         print devices
-        print chr(27)+"[0;91m"+"[!]"+chr(27)+"[0m"+" Dispositivos disponibles:"
+        print chr(27) + "[0;91m" + "[!]" + chr(27) + "[0m" + " Dispositivos disponibles:"
         for d in devices:
             print " -> " + d
 
-        dev = raw_input(chr(27)+"[0;92m"+"[+]"+chr(27)+"[0m"+" Introduzca el nombre del dispositivo: ")
+        dev = raw_input(chr(27) + "[0;92m" + "[+]" + chr(27) + "[0m" + " Introduzca el nombre del dispositivo: ")
 
-        print chr(27)+"[0;91m"+"[!]"+chr(27)+"[0m"+" Dispositivo seleccionado: " + dev
+        print chr(27) + "[0;91m" + "[!]" + chr(27) + "[0m" + " Dispositivo seleccionado: " + dev
 
         cap = pcapy.open_live(dev, 65536, 1, 0)
-        options = raw_input(chr(27)+"[0;92m"+"[+]"+chr(27)+"[0m"+" Introduzca las opciones:")
+        options = raw_input(chr(27) + "[0;92m" + "[+]" + chr(27) + "[0m" + " Introduzca las opciones:")
         if options == 'ALL':
             options = {'TCP': True, 'ICMP': True, 'UDP': True, 'OTHER': True}
         else:
@@ -40,30 +41,40 @@ class Main:
                     print "[-] Protocolo incorrecto."
 
         # Empezamos a sniffar paquetes
-        while (1):
+        while 1:
             (header, packet) = cap.next()
             self.parse_packet(packet, options)
 
 
     # Parseador de la dirección mac de asignada a la ethernet
-    def eth_addr(self,a):
+    def eth_addr(self, a):
         b = "%.2x:%.2x:%.2x:%.2x:%.2x:%.2x" % (ord(a[0]), ord(a[1]), ord(a[2]), ord(a[3]), ord(a[4]), ord(a[5]))
         return b
 
+    def parserCredentials(self, data):
+        expresionesUser = []
+        foundUsers = []
+        expresionesUser.append("[^|&].*[uU][sS][eE][rR][^=]*=([^&]*)")
+        expresionesUser.append("[^|&].*[lL][oO][gG][iI][nN][^=]*=([^&]*)")
+        expresionesUser.append("[^|&].*[aA][pP][oO][dD][oO][^=]*=([^&]*)")
+        expresionesUser.append("[^|&].*[uU][sS][rR][^=]*=([^&]*)")
+        re.findall()
+
     # Función de parseo del paquete
-    def parse_packet(self,packet, options):
+    def parse_packet(self, packet, options):
         # Parseo del paquete ethernet
         eth_length = 14
 
         eth_header = packet[:eth_length]
         eth = unpack('!6s6sH', eth_header)
         eth_protocol = socket.ntohs(eth[2])
-        print 'Destination MAC : ' + self.eth_addr(packet[0:6]) + ' Source MAC : ' + self.eth_addr(packet[6:12]) + ' Protocol : ' + str(eth_protocol)
+        print 'Destination MAC : ' + self.eth_addr(packet[0:6]) + ' Source MAC : ' + self.eth_addr(
+            packet[6:12]) + ' Protocol : ' + str(eth_protocol)
 
         # Parseamos todos los paquete tipo IP
         if eth_protocol == 8:
-            #Parseamos la cabecera IP
-            #Cogemos los 20 bytes desde el principio de la cabecera
+            # Parseamos la cabecera IP
+            # Cogemos los 20 bytes desde el principio de la cabecera
             ip_header = packet[eth_length:20 + eth_length]
 
             #Desempaquetamos el paquete
@@ -83,9 +94,7 @@ class Main:
             s_addr = socket.inet_ntoa(iph[8]);
             d_addr = socket.inet_ntoa(iph[9]);
 
-            print 'Version : ' + str(version) + ' Longitud cabecera: ' + str(ihl) + ' TTL : ' + str(
-                ttl) + ' Protocolo : ' + str(protocol) + ' Dirección de origen : ' + str(
-                s_addr) + ' Dirección de destino : ' + str(d_addr)
+            # print 'Version : ' + str(version) + ' Longitud cabecera: ' + str(ihl) + ' TTL : ' + str(ttl) + ' Protocolo : ' + str(protocol) + ' Dirección de origen : ' + str(s_addr) + ' Dirección de destino : ' + str(d_addr)
 
             #Protocolo TCP
             if protocol == 6 and options['TCP']:
@@ -101,9 +110,7 @@ class Main:
                 doff_reserved = tcph[4]
                 tcph_length = doff_reserved >> 4
 
-                print 'Puerto de origen : ' + str(source_port) + ' Puerto de destino : ' + str(
-                    dest_port) + ' Numero de secuencia : ' + str(
-                    sequence) + ' ACK : ' + str(acknowledgement) + ' Longitud cabecera : ' + str(tcph_length)
+                # print 'Puerto de origen : ' + str(source_port) + ' Puerto de destino : ' + str(dest_port) + ' Numero de secuencia : ' + str(sequence) + ' ACK : ' + str(acknowledgement) + ' Longitud cabecera : ' + str(tcph_length)
 
                 h_size = eth_length + iph_length + tcph_length * 4
                 data_size = len(packet) - h_size
@@ -126,7 +133,7 @@ class Main:
                 code = icmph[1]
                 checksum = icmph[2]
 
-                print 'Type : ' + str(icmp_type) + ' Code : ' + str(code) + ' Checksum : ' + str(checksum)
+                # print 'Type : ' + str(icmp_type) + ' Code : ' + str(code) + ' Checksum : ' + str(checksum)
 
                 h_size = eth_length + iph_length + icmph_length
                 data_size = len(packet) - h_size
@@ -148,9 +155,7 @@ class Main:
                 length = udph[2]
                 checksum = udph[3]
 
-                print 'Puerto de origen : ' + str(source_port) + ' Puerto de destino : ' + str(
-                    dest_port) + ' Longitud : ' + str(
-                    length) + ' Checksum : ' + str(checksum)
+                # print 'Puerto de origen : ' + str(source_port) + ' Puerto de destino : ' + str(dest_port) + ' Longitud : ' + str(length) + ' Checksum : ' + str(checksum)
 
                 h_size = eth_length + iph_length + udph_length
                 data_size = len(packet) - h_size
