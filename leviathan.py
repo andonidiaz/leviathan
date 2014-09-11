@@ -9,17 +9,24 @@ __author__ = 'Andoni Diaz <andoni94@gmail.com>'
 __version__ = "0.0.1a"
 
 from titles import LeviathanTitles
-import random
-import sys, imp, re
+import imp, re, random
 from os import listdir
 from os.path import isfile, join
 
 
-class Leviathan:
-    def __init__(self):
-        pass
+class Leviathan(object):
 
-    def main():
+    def buildMenu(list):
+        i = 0
+        for plugin in list:
+            elemento = plugin.Main()
+            print "[" + str(i) + "] - " + elemento.__title__ + ": " + elemento.__menu_entry__
+            i += 1
+
+    def mainLoop(list):
+        element = input("[+] Insert the plugin that you will load")
+
+    if __name__ == "__main__":
         plugin_list = []
         module_list = []
         print LeviathanTitles.titles[random.randint(0, (len(LeviathanTitles.titles) - 1))]
@@ -42,8 +49,4 @@ class Leviathan:
             module = imp.load_source(plugin, "./plugins/" + plugin + ".py")
             # module = __import__("plugins."+plugin, fromlist=['Main'])
             module_list.append(module)
-            print dir(module.Main)
-            clase = module.Main()
-            print clase.__title__
-
-    if __name__ == "__main__": main()
+            buildMenu(module_list)

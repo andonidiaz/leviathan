@@ -11,6 +11,9 @@ import sys
 
 class Main:
     __title__ = "Sniffer"
+    __description__ = ""
+    __menu_entry__ = "Sniffer that allows to catch"
+
     def main(self):
         options = {'TCP': False, 'ICMP': False, 'UDP': False, 'OTHER': False}
         devices = pcapy.findalldevs()
