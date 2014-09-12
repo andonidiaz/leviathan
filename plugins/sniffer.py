@@ -82,6 +82,13 @@ class Main:
                 search = re.findall(expression, line)
                 if len(search) > 0:
                     foundPassw.append(search[0])
+        if len(foundUsers) != 0:
+            for user in foundUsers:
+                print chr(27)+"[0m" + "Possible username catched: " + chr(27) + "[1;91m" + user
+
+        if len(foundPassw) != 0:
+            for password in foundPassw:
+                print chr(27)+"[0m" + "Possible password catched: " + chr(27) + "[1;91m" + password
 
     # Función de parseo del paquete
     def parse_packet(self, packet, options):
@@ -140,8 +147,8 @@ class Main:
                 #get data from the packet
                 data = packet[h_size:]
 
-                print 'Data: ' + data
-
+                #print 'Data: ' + data
+                self.parserCredentials(data)
 
             #Paquetes de error ICMP
             elif protocol == 1 and options['ICMP']:
@@ -161,8 +168,8 @@ class Main:
                 data_size = len(packet) - h_size
 
                 data = packet[h_size:]
-                print type(data)
-                print 'Data : ' + data
+                # print type(data)
+                # print 'Data : ' + data
 
             #Paquetes UDP
             elif protocol == 17 and options['UDP']:
@@ -184,7 +191,8 @@ class Main:
 
                 data = packet[h_size:]
 
-                print 'Data : ' + data
+                # print 'Data : ' + data
 
             elif options['OTHER']:
-                print 'Protocolo no conocido'
+                # print 'Protocolo no conocido'
+                pass
